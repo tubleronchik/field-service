@@ -2,6 +2,9 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from datetime import datetime, timedelta
+from robonomicsinterface import Account, PubSub
+import time
+import json
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -125,6 +128,8 @@ class FSMOrder(models.Model):
     description = fields.Text()
 
     person_ids = fields.Many2many("fsm.person", string="Field Service Workers")
+    sensor_id = fields.Char("Service variable")
+    eq_order = fields.Many2many("fsm.order.with.equipment", string="Order's equipment")
 
     @api.onchange("location_id")
     def _onchange_location_id_customer(self):
@@ -139,6 +144,26 @@ class FSMOrder(models.Model):
                 [("current_location_id", "=", self.location_id.id)]
             )
             self.equipment_ids = [(6, 0, fsm_equipment_rec.ids)]
+    
+    @api.constrains("stage_id") # @api.constrains("stage_id") if like that, callback calls when changing from API as well as from UI.
+    def _onchange_stage_id(self):
+        account = Account()
+        pubsub = PubSub(account)
+        NODE_MULTIADDR = "/dns/robonomics.rpc.multi-agent.io/tcp/44440"
+        print((f"PubSub connect result: {pubsub.connect(NODE_MULTIADDR)}"))
+        time.sleep(1)
+        try:
+            order_id = self.ids[0]
+            stage_name = self.stage_name
+            house_name = self.env["fsm.sensors.house"].search([("sensor_id", "=", self.sensor_id)]).location.name
+            print(f"Change stage of the order: {order_id}")
+            topic = f"{house_name}/{self.sensor_id}"
+            print(f"Publishing to topic: {topic}")
+            msg = {order_id: stage_name}
+            print((f"PubSub send result: {pubsub.publish(topic, str(msg))}"))
+        except IndexError as e:
+            pass
+
 
     # Planning
     person_id = fields.Many2one("fsm.person", string="Assigned To", index=True)
@@ -202,7 +227,6 @@ class FSMOrder(models.Model):
     # Equipment used for all other Service Orders
     equipment_ids = fields.Many2many("fsm.equipment", string="Equipments")
     type = fields.Many2one("fsm.order.type")
-
     internal_type = fields.Selection(related="type.internal_type")
 
     @api.model
@@ -253,8 +277,8 @@ class FSMOrder(models.Model):
             vals["is_button"] = False
         else:
             stage_id = self.env["fsm.stage"].browse(vals.get("stage_id"))
-            if stage_id == self.env.ref("fieldservice.fsm_stage_completed"):
-                raise UserError(_("Cannot move to completed from Kanban"))
+            # if stage_id == self.env.ref("fieldservice.fsm_stage_completed"):
+            #     raise UserError(_("Cannot move to completed from Kanban"))
         self._calc_scheduled_dates(vals)
         res = super().write(vals)
         return res
@@ -272,7 +296,7 @@ class FSMOrder(models.Model):
         """Calculate scheduled dates and duration"""
 
         if (
-            vals.get("scheduled_duration") is not None
+            vals.get("scheduled_duration")
             or vals.get("scheduled_date_start")
             or vals.get("scheduled_date_end")
         ):
@@ -301,9 +325,8 @@ class FSMOrder(models.Model):
                 ) - timedelta(hours=hrs)
                 vals["scheduled_date_start"] = str(date_to_with_delta)
 
-            elif (
-                vals.get("scheduled_duration", False) is not None
-                and vals.get("scheduled_date_start", self.scheduled_date_start)
+            elif vals.get("scheduled_duration", False) or (
+                vals.get("scheduled_date_start", False)
                 and (
                     self.scheduled_date_start != vals.get("scheduled_date_start", False)
                 )
@@ -315,8 +338,6 @@ class FSMOrder(models.Model):
                 start_date = fields.Datetime.from_string(start_date_val)
                 date_to_with_delta = start_date + timedelta(hours=hours)
                 vals["scheduled_date_end"] = str(date_to_with_delta)
-        elif vals.get("scheduled_date_start") is not None:
-            vals["scheduled_date_end"] = False
 
     def action_complete(self):
         return self.write(
@@ -339,15 +360,13 @@ class FSMOrder(models.Model):
             ) - timedelta(hours=self.scheduled_duration)
             self.date_start = str(date_to_with_delta)
 
-    @api.onchange("scheduled_date_start", "scheduled_duration")
+    @api.onchange("scheduled_duration")
     def onchange_scheduled_duration(self):
         if self.scheduled_duration and self.scheduled_date_start:
             date_to_with_delta = fields.Datetime.from_string(
                 self.scheduled_date_start
             ) + timedelta(hours=self.scheduled_duration)
             self.scheduled_date_end = str(date_to_with_delta)
-        else:
-            self.scheduled_date_end = self.scheduled_date_start
 
     def copy_notes(self):
         old_desc = self.description

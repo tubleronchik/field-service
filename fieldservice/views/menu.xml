@@ -10,6 +10,7 @@
     <menuitem id="dashboard" name="Dashboard" sequence="10" parent="root" />
     <menuitem id="operations" name="Operations" sequence="20" parent="root" />
     <menuitem id="data" name="Master Data" sequence="30" parent="root" />
+    <menuitem id="test" name="Lalala" sequence="40" parent="root" />
     <menuitem
         id="reporting"
         name="Reporting"
@@ -85,6 +86,20 @@
         parent="data"
         sequence="80"
         groups="group_fsm_equipment"
+    />
+    <menuitem
+        id="menu_fsm_order_with_equipment"
+        name="FSM Order with Equipment"
+        action="action_fsm_order_with_equipment"
+        parent="data"
+        sequence="25"
+    />
+    <menuitem
+        id="menu_fsm_sensors_house"
+        name="FSM Sensors-Houses"
+        action="action_fsm_sensors_house"
+        parent="data"
+        sequence="15"
     />
     <menuitem
         id="menu_fsm_location_person"

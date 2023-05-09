@@ -44,4 +44,8 @@
         <field name="name">Manage Territories</field>
         <field name="category_id" ref="base.module_category_hidden" />
     </record>
+    <record id="group_fsm_order_with_equipment" model="res.groups">
+        <field name="name">Manage Orders with Equipments</field>
+        <field name="category_id" ref="base.module_category_hidden" />
+    </record>
 </odoo>

@@ -172,27 +172,20 @@
                                 <group id="execution-right" />
                             </group>
                         </page>
-                        <page
-                            string="Equipments"
-                            groups="fieldservice.group_fsm_equipment"
-                            name="equipements_page"
-                            attrs="{'invisible': [('internal_type', 'in', ['repair', 'maintenance'])]}"
-                        >
-                            <field
-                                name="equipment_ids"
-                                attrs="{'required': [('internal_type', 'not in', ['repair', 'maintenance'])]}"
-                                options="{'no_create': True}"
-                                domain="[('current_location_id','=',location_id)]"
+                            <page
+                                string="Equipments"                                
+                                name="equipements_page"
                             >
-                                <tree>
-                                    <field name="name" />
-                                    <field name="person_id" />
-                                    <field name="location_id" />
-                                    <field name="current_location_id" />
-                                    <field name="stage_id" />
-                                </tree>
-                            </field>
-                        </page>
+                                <field
+                                    name="eq_order" context="{'active_id': id}"                             
+                                >
+                                    <tree>
+                                        <field name="equipment_name" />
+                                        <field name="quantity_used" />
+                                        <field name="quantity_available" />
+                                    </tree>
+                                </field>
+                            </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">

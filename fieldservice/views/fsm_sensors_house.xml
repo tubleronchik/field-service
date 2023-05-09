@@ -1,0 +1,35 @@
+<odoo>
+    <data>
+        <record id="fsm_sensors_house_tree_view" model="ir.ui.view">
+            <field name="name">fsm.sensors.house.tree</field>
+            <field name="model">fsm.sensors.house</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="sensor_id"/>
+                    <field name="location"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_fsm_sensors_house_form" model="ir.ui.view">
+            <field name="name">fsm.sensors.house.form</field>
+            <field name="model">fsm.sensors.house</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="sensor_id"/>
+                            <field name="location"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_fsm_sensors_house" model="ir.actions.act_window">
+            <field name="name">FSM Sensors-Houses</field>
+            <field name="res_model">fsm.sensors.house</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>

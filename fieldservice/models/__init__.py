@@ -18,4 +18,6 @@ from . import (
     fsm_order,
     fsm_order_type,
     fsm_person_calendar_filter,
+    fsm_order_equipment,
+    fsm_sensors_house
 )

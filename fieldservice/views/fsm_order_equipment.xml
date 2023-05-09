@@ -1,0 +1,40 @@
+<odoo>
+    <data>
+        <record id="fsm_order_with_equipment_tree_view" model="ir.ui.view">
+            <field name="name">fsm.order.with.equipment.tree</field>
+            <field name="model">fsm.order.with.equipment</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="order_name"/>
+                    <field name="equipment_name"/>
+                    <field name="quantity_used"/>
+                    <field name="quantity_available"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_fsm_order_with_equipment_form" model="ir.ui.view">
+            <field name="name">fsm.order.with.equipment.form</field>
+            <field name="model">fsm.order.with.equipment</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="order_id"/>
+                            <field name="equipment_id"/>
+                            <field name="equipment_name"/>
+                            <field name="quantity_used"/>
+                            <field name="quantity_available"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_fsm_order_with_equipment" model="ir.actions.act_window">
+            <field name="name">FSM Order with Equipment</field>
+            <field name="res_model">fsm.order.with.equipment</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
